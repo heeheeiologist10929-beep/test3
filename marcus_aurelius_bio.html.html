@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marcus Aurelius - Philosopher Emperor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Text:wght@400;600&display=swap');
+        
+        body {
+            font-family: 'Crimson Text', serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .stained-glass {
+            background: 
+                linear-gradient(45deg, rgba(139, 69, 19, 0.8) 25%, transparent 25%),
+                linear-gradient(-45deg, rgba(139, 69, 19, 0.8) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, rgba(139, 69, 19, 0.8) 75%),
+                linear-gradient(-45deg, transparent 75%, rgba(139, 69, 19, 0.8) 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+        
+        .book-spine {
+            transition: all 0.3s ease;
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .book-spine:hover {
+            transform: translateX(-5px);
+            box-shadow: 10px 10px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        .parchment {
+            background: linear-gradient(to bottom, #f8f0d8 0%, #e7d9b4 100%);
+            border: 2px solid #d4c09c;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .gold-border {
+            border: 3px solid transparent;
+            background: linear-gradient(45deg, #d4af37, #ffd700, #d4af37) border-box;
+            border-radius: 8px;
+        }
+        
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease;
+        }
+        
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .mosaic-tile {
+            animation: shimmer 2s infinite alternate;
+        }
+        
+        @keyframes shimmer {
+            from { filter: brightness(1); }
+            to { filter: brightness(1.2); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        /* Member popup styles */
+        .member-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .member-popup.visible {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .member-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 3px solid #d4af37;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem;
+            max-width: 400px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .member-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(212, 175, 55, 0.3);
+        }
+        
+        .member-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #d4af37;
+            margin: 0 auto 1rem;
+            background: linear-gradient(45deg, #d4af37, #ffd700);
+        }
+        
+        .member-name {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #d4af37;
+            margin-bottom: 0.5rem;
+        }
+        
+        .member-role {
+            color: #a0aec0;
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+        
+        .close-popup {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #d4af37;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .close-popup:hover {
+            background: #ffd700;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="text-white relative min-h-screen">
+    <!-- Presentation Explanation Overlay -->
+    <div id="explanation" class="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center transition-opacity duration-500">
+        <div class="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-xl max-w-2xl mx-4 border-2 border-gold border-opacity-50">
+            <div class="text-center mb-6">
+                <h2 class="text-3xl font-cinzel text-gold-400 mb-4">Presentation Concept Explanation</h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-yellow-400 to-yellow-600 mx-auto mb-4"></div>
+            </div>
+            
+            <div class="space-y-4 text-lg">
+                <p class="text-gray-300">This interactive presentation features Marcus Aurelius' biography structured as three ancient books, representing his life, philosophy, and legacy.</p>
+                
+                <p class="text-gray-300"><strong>Design Elements:</strong></p>
+                <ul class="list-disc list-inside text-gray-300 space-y-2 ml-4">
+                    <li>Quarter-illustration layout with visual hierarchy</li>
+                    <li>Painted gradient background evoking Roman skies</li>
+                    <li>Mosaic-stained glass portrait (bottom-left) inspired by Byzantine art</li>
+                    <li>Three illuminated books (right side) with Roman architectural motifs</li>
+                </ul>
+                
+                <p class="text-gray-300"><strong>Interactive Features:</strong></p>
+                <ul class="list-disc list-inside text-gray-300 space-y-2 ml-4">
+                    <li>Hover effects on book spines</li>
+                    <li>Animated content reveals</li>
+                    <li>Responsive parchment scrolls</li>
+                    <li>Stained glass mosaic effects</li>
+                </ul>
+            </div>
+            
+            <button onclick="hideExplanation()" class="mt-8 w-full bg-gradient-to-r from-yellow-600 to-yellow-700 text-white py-3 px-6 rounded-lg font-semibold hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300">
+                Begin Presentation
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="container mx-auto px-4 py-8 relative">
+        <!-- Header Section -->
+        <header class="text-center mb-12 reveal">
+            <h1 class="text-5xl md:text-6xl font-cinzel font-bold mb-4 bg-gradient-to-r from-yellow-300 to-yellow-600 bg-clip-text text-transparent">
+                MARCUS AURELIUS
+            </h1>
+            <p class="text-xl text-gray-300 italic">Philosopher Emperor • Stoic Sage • Last of the Five Good Emperors</p>
+            <div class="w-32 h-1 bg-gradient-to-r from-yellow-400 to-yellow-600 mx-auto mt-4"></div>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
+            <!-- Left Column - Illustration Quarter -->
+            <div class="lg:col-span-1 relative">
+                <!-- Gradient Background Illustration -->
+                <div class="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-teal-900 rounded-2xl opacity-80"></div>
+                
+                <!-- Stained Glass Marcus Aurelius Portrait -->
+                <div class="relative z-10 mt-8 lg:absolute lg:bottom-8 lg:left-8 w-64 h-64 mx-auto lg:mx-0">
+                    <div class="stained-glass rounded-full p-1 gold-border floating">
+                        <div class="bg-black rounded-full p-4">
+                            <img src="MARCUSAURELIUS.png"
+                            alt="Mosaic stained glass portrait of Marcus Aurelius with laurel crown, classical Roman features, and thoughtful expression"
+                            class="w-full h-full object-cover rounded-full mosaic-tile"
+                            onerror="this.onerror=null;this.style.display='none';">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Three Books -->
+            <div class="lg:col-span-3 space-y-8">
+                <!-- Book 1: Life & Rule -->
+                <div class="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-6 shadow-2xl border border-gray-700 reveal">
+                    <div class="flex items-start space-x-6">
+                        <!-- Book Cover -->
+                        <div class="flex-shrink-0">
+<div class="book-spine w-24 h-32 bg-gradient-to-b from-yellow-800 to-yellow-600 rounded-lg border-2 border-yellow-700 relative overflow-hidden" onclick="toggleContent('book1')">
+                                <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+                                <div class="absolute top-4 left-0 right-0 text-center">
+                                    <span class="text-white font-cinzel text-sm font-bold">I</span>
+                                </div>
+                                <div class="absolute bottom-4 left-0 right-0 text-center">
+                                    <span class="text-yellow-200 font-cinzel text-xs">LIFE & RULE</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Book Content -->
+                        <div class="flex-1 parchment rounded-lg p-6">
+<h3 class="text-2xl font-cinzel font-bold text-gray-800 mb-4">Book I: Life & Rule</h3>
+                            
+                            <div class="space-y-4" id="book1" style="display: none;">
+                                <div>
+<h4 class="font-semibold text-red-800 mb-2">Page 1: Early Life</h4>
+<p class="text-gray-700">Marcus Aurelius was born on April 26, 121 AD in Rome, Italy. His father died when he was young, and he was adopted by Antoninus Pius, who later became emperor. He was trained in philosophy, literature, and military skills, showing a love for wisdom even as a child. Teachers nicknamed him “Verissimus” (the truest one) because of his honesty and seriousness.</p>
+                                </div>
+                                
+                                <div>
+<h4 class="font-semibold text-red-800 mb-2">Page 2: Emperor</h4>
+<p class="text-gray-700">He became Roman Emperor in 161 AD, ruling alongside Lucius Verus. Marcus faced many challenges: wars along the empire’s frontiers and a deadly plague. After Verus’ death, he ruled alone until later sharing power with his son Commodus. Despite hardships, he was remembered as the “Philosopher King” because he ruled with wisdom and reason.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Book 2: Philosophy & Writings -->
+                <div class="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-6 shadow-2xl border border-gray-700 reveal">
+                    <div class="flex items-start space-x-6">
+                        <!-- Book Cover -->
+                        <div class="flex-shrink-0">
+<div class="book-spine w-24 h-32 bg-gradient-to-b from-blue-800 to-blue-600 rounded-lg border-2 border-blue-700 relative overflow-hidden" onclick="toggleContent('book2')">
+                                <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+                                <div class="absolute top-4 left-0 right-0 text-center">
+                                    <span class="text-white font-cinzel text-sm font-bold">II</span>
+                                </div>
+                                <div class="absolute bottom-4 left-0 right-0 text-center">
+                                    <span class="text-blue-200 font-cinzel text-xs">PHILOSOPHY</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Book Content -->
+                        <div class="flex-1 parchment rounded-lg p-6">
+                            <h3 class="text-2xl font-cinzel font-bold text-gray-800 mb-4">Book II: Philosophy & Writings</h3>
+                            
+                            <div class="space-y-4" id="book2" style="display: none;">
+                                <div>
+<h4 class="font-semibold text-red-800 mb-2">Page 1: Stoicism</h4>
+<p class="text-gray-700">Marcus followed Stoicism, a philosophy that teaches self-control, rationality, and virtue. He believed happiness does not depend on wealth or power, but on controlling one’s mind. A Stoic accepts events calmly, focusing only on what is within their control. For Marcus, philosophy was not just theory—it was a guide for daily life and leadership.</p>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="font-semibold text-red-800 mb-2">Page 2: Meditations</h4>
+                                    <p class="text-gray-700">During military campaigns, Marcus wrote a personal journal, later known as Meditations. It was never meant for others to read; it was his private reflections and reminders. The writings discuss life, death, duty, and inner peace. Famous idea: "You have power over your mind—not outside events. Realize this, and you will find strength."</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Book 3: Legacy -->
+                <div class="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-6 shadow-2xl border border-gray-700 reveal">
+                    <div class="flex items-start space-x-6">
+                        <!-- Book Cover -->
+                        <div class="flex-shrink-0">
+<div class="book-spine w-24 h-32 bg-gradient-to-b from-green-800 to-green-600 rounded-lg border-2 border-green-700 relative overflow-hidden" onclick="toggleContent('book3')">
+                                <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+                                <div class="absolute top-4 left-0 right-0 text-center">
+                                    <span class="text-white font-cinzel text-sm font-bold">III</span>
+                                </div>
+                                <div class="absolute bottom-4 left-0 right-0 text-center">
+                                    <span class="text-green-200 font-cinzel text-xs">LEGACY</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Book Content -->
+                        <div class="flex-1 parchment rounded-lg p-6">
+                            <h3 class="text-2xl font-cinzel font-bold text-gray-800 mb-4">Book III: Legacy</h3>
+                            
+                            <div class="space-y-4" id="book3" style="display: none;">
+                                <div>
+                                    <h4 class="font-semibold text-red-800 mb-2">Page 1: Death</h4>
+                                    <p class="text-gray-700">Marcus Aurelius died on March 17, 180 AD, in Vindobona (modern Vienna). His death marked the end of the Pax Romana (Roman peace) and he was the last of the "Five Good Emperors." His son Commodus succeeded him, whose rule was very different from his father's wise and philosophical approach.</p>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="font-semibold text-red-800 mb-2">Page 2: Influence</h4>
+                                    <p class="text-gray-700">Marcus Aurelius is remembered as a wise and just ruler. His book Meditations continues to inspire modern thinkers, leaders, and everyday people. Stoicism, the philosophy he followed, influences self-help, military training, and daily life today. His ideas about inner strength and resilience remain relevant centuries later.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Group Members Section -->
+        <div class="mb-12 reveal">
+            <div class="text-center mb-8">
+                <h2 class="text-4xl font-cinzel font-bold bg-gradient-to-r from-yellow-300 to-yellow-600 bg-clip-text text-transparent">
+                    PROJECT TEAM
+                </h2>
+                <p class="text-gray-300 mt-2">Click on each member to learn more</p>
+                <div class="w-24 h-1 bg-gradient-to-r from-yellow-400 to-yellow-600 mx-auto mt-4"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Member 1 - Genesis Edrosa -->
+                <div class="member-card" onclick="showMemberPopup('member1')">
+                    <div class="member-image" id="member1-image">
+                        <img src="Edrosa.jpg"
+                         alt="Genesis Edrosa"
+                        class="w-full h-full rounded-full object-cover"
+                        onerror="this.onerror=null;this.style.display='none';">
+                    </div>
+                    <h3 class="member-name" id="member1-name">Genesis Edrosa</h3>
+                    <p class="member-role" id="member1-role">Leader</p>
+                </div>
+
+                <!-- Member 2 - Stephen Cervantes -->
+                <div class="member-card" onclick="showMemberPopup('member2')">
+                    <div class="member-image" id="member2-image">
+                        <img src="Cevantes.jpg"
+                        alt="Cervantes"
+                        class="w-full h-full rounded-full object-cover"
+                        onerror="this.onerror=null;this.style.display='none';">
+                    </div>
+                    <h3 class="member-name" id="member2-name">Stephen Cervantes</h3>
+                    <p class="member-role" id="member2-role">Member</p>
+                </div>
+
+                <!-- Member 3 - Estaris -->
+                <div class="member-card" onclick="showMemberPopup('member3')">
+                    <div class="member-image" id="member3-image">
+                        <img src="Estaris.jpg"
+                         alt="Shawn Estaris"
+                        class="w-full h-full rounded-full object-cover"
+                         onerror="this.onerror=null;this.style.display='none';">
+                      </div>
+                    <h3 class="member-name" id="member3-name">Shawn Estaris</h3>
+                    <p class="member-role" id="member3-role">Member</p>
+                    </div>
+
+
+                <!-- Member 4 - Gabrielle Dela Merced -->
+                <div class="member-card" onclick="showMemberPopup('member4')">
+                    <div class="member-image" id="member4-image">
+                         <img src="Gab.jpg"
+                        alt="Gabrielle Dela Merced"
+                        class="w-full h-full rounded-full object-cover"
+                         onerror="this.onerror=null;this.style.display='none';">
+                    </div>
+                    <h3 class="member-name" id="member4-name">Gabrielle Dela Merced</h3>
+                    <p class="member-role" id="member4-role">Member</p>
+                    </div>
+
+
+        <!-- Member Popup Overlays -->
+        <div id="member1-popup" class="member-popup">
+            <div class="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-xl max-w-md mx-4 border-2 border-yellow-600">
+                <button class="close-popup" onclick="hideMemberPopup('member1')">×</button>
+                <div class="text-center">
+                    <div class="member-image mx-auto mb-4">
+                        <div class="w-full h-full rounded-full bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center text-white">
+                            <span class="text-2xl">👤</span>
+                        </div>
+                    </div>
+                    <h3 class="member-name mb-2">Member Name</h3>
+                    <p class="member-role mb-4">Role</p>
+                    <div class="parchment p-4 rounded-lg">
+                        <p class="text-gray-700" id="member1-description">
+                            Add your description here. This could include the member's contributions, role in the project, or any other relevant information.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="member2-popup" class="member-popup">
+            <div class="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-xl max-w-md mx-4 border-2 border-yellow-600">
+                <button class="close-popup" onclick="hideMemberPopup('member2')">×</button>
+                <div class="text-center">
+                    <div class="member-image mx-auto mb-4">
+                        <div class="w-full h-full rounded-full bg-gradient-to-br from-green-400 to-blue-600 flex items-center justify-center text-white">
+                            <span class="text-2xl">👤</span>
+                        </div>
+                    </div>
+                    <h3 class="member-name mb-2">Member Name</h3>
+                    <p class="member-role mb-4">Role</p>
+                    <div class="parchment p-4 rounded-lg">
+                        <p class="text-gray-700" id="member2-description">
+                            Add your description here. This could include the member's contributions, role in the project, or any other relevant information.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="member3-popup" class="member-popup">
+            <div class="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-xl max-w-md mx-4 border-2 border-yellow-600">
+                <button class="close-popup" onclick="hideMemberPopup('member3')">×</button>
+                <div class="text-center">
+                    <div class="member-image mx-auto mb-4">
+                        <div class="w-full h-full rounded-full bg-gradient-to-br from-yellow-400 to-red-600 flex items-center justify-center text-white">
+                            <span class="text-2xl">👤</span>
+                        </div>
+                    </div>
+                    <h3 class="member-name mb-2">Member Name</h3>
+                    <p class="member-role mb-4">Role</p>
+                    <div class="parchment p-4 rounded-lg">
+                        <p class="text-gray-700" id="member3-description">
+                            Add your description here. This could include the member's contributions, role in the project, or any other relevant information.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="member4-popup" class="member-popup">
+            <div class="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-xl max-w-md mx-4 border-2 border-yellow-600">
+                <button class="close-popup" onclick="hideMemberPopup('member4')">×</button>
+                <div class="text-center">
+                    <div class="member-image mx-auto mb-4">
+                        <div class="w-full h-full rounded-full bg-gradient-to-br from-purple-400 to-pink-600 flex items-center justify-center text-white">
+                            <span class="text-2xl">👤</span>
+                        </div>
+                    </div>
+                    <h3 class="member-name mb-2">Member Name</h3>
+                    <p class="member-role mb-4">Role</p>
+                    <div class="parchment p-4 rounded-lg">
+                        <p class="text-gray-700" id="member4-description">
+                            Add your description here. This could include the member's contributions, role in the project, or any other relevant information.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quote Section -->
+        <div class="text-center mb-12 reveal">
+            <div class="bg-gradient-to-r from-yellow-900 to-yellow-700 p-8 rounded-2xl border-2 border-yellow-600">
+                <blockquote class="text-xl italic text-yellow-100 leading-relaxed">
+                    "You have power over your mind - not outside events. Realize this, and you will find strength."
+                </blockquote>
+                <p class="text-yellow-200 mt-4 font-cinzel">- Marcus Aurelius, Meditations</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center text-gray-400 text-sm">
+            <p>Designed as an interactive educational presentation • Inspired by Roman art and Stoic philosophy</p>
+            <p class="mt-2">© 2024 Marcus Aurelius Biography Presentation</p>
+        </footer>
+    </div>
+
+    <script>
+        // Show explanation overlay on load
+        function hideExplanation() {
+            document.getElementById('explanation').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('explanation').style.display = 'none';
+            }, 500);
+            
+            // Start animations after explanation is hidden
+            setTimeout(initAnimations, 600);
+        }
+
+        // Initialize scroll animations
+        function initAnimations() {
+            const reveals = document.querySelectorAll('.reveal');
+            
+            function checkReveal() {
+                reveals.forEach(element => {
+                    const windowHeight = window.innerHeight;
+                    const elementTop = element.getBoundingClientRect().top;
+                    const elementVisible = 150;
+                    
+                    if (elementTop < windowHeight - elementVisible) {
+                        element.classList.add('visible');
+                    }
+                });
+            }
+            
+            window.addEventListener('scroll', checkReveal);
+            checkReveal(); // Initial check
+        }
+
+        // Toggle content visibility
+        function toggleContent(bookId) {
+            const content = document.getElementById(bookId);
+            if (content.style.display === "none") {
+                content.style.display = "block";
+            } else {
+                content.style.display = "none";
+            }
+        }
+
+        // Member popup functions
+        function showMemberPopup(memberId) {
+            const popup = document.getElementById(`${memberId}-popup`);
+            popup.classList.add('visible');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideMemberPopup(memberId) {
+            const popup = document.getElementById(`${memberId}-popup`);
+            popup.classList.remove('visible');
+            document.body.style.overflow = 'auto';
+            
+            // Remove visible class after transition
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 300);
+        }
+
+        // Close popup when clicking outside content
+        document.querySelectorAll('.member-popup').forEach(popup => {
+            popup.addEventListener('click', (e) => {
+                if (e.target === popup) {
+                    const memberId = popup.id.replace('-popup', '');
+                    hideMemberPopup(memberId);
+                }
+            });
+        });
+
+        // Show explanation immediately
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('explanation').style.opacity = '1';
+        });
+    </script>
+</body>
+</html>
